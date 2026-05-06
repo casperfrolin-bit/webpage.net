@@ -1,50 +1,51 @@
-# 🦆 DuckDuckGo Proxy Search (GitHub + Vercel)
+# 🧭 Simple Proxy Search Site
 
-En söksida som använder DuckDuckGo via en proxy → döljer användarens IP.
+Frontend (GitHub Pages) + Backend (Vercel Proxy)
 
 ---
 
-## 📁 Struktur
+## 📁 STRUCTURE
 
-project/
+/
 │── index.html
 │── api/
 │   └── search.js
-│── package.json
 
 ---
 
-## 📄 index.html
+# 🌐 index.html (FRONTEND)
 
+```html id="front1"
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Search</title>
-  <style>
-    body { font-family: Arial; background:#111; color:#fff; text-align:center; padding:40px; }
-    input { padding:10px; width:300px; border-radius:8px; border:none; }
-    button { padding:10px; border:none; border-radius:8px; cursor:pointer; }
-    .card { background:#222; margin:10px; padding:15px; border-radius:10px; }
-  </style>
+<meta charset="UTF-8">
+<title>Proxy Search</title>
+<style>
+body { font-family: Arial; background:#111; color:white; text-align:center; padding:40px; }
+input { padding:10px; width:300px; border-radius:8px; border:none; }
+button { padding:10px; border-radius:8px; border:none; cursor:pointer; }
+.card { background:#222; margin:10px auto; padding:15px; width:70%; border-radius:10px; }
+a { color:#4CAF50; }
+</style>
 </head>
 <body>
 
-<h1>🦆 Search</h1>
+<h1>🔎 Proxy Search</h1>
 
 <input id="q" placeholder="Search..." />
-<button onclick="search()">Go</button>
+<button onclick="search()">Search</button>
 
-<div id="results"></div>
+<div id="out"></div>
 
 <script>
 async function search() {
   const q = document.getElementById("q").value;
-  const resDiv = document.getElementById("results");
+  const out = document.getElementById("out");
 
-  resDiv.innerHTML = "Loading...";
+  out.innerHTML = "Loading...";
 
-  const res = await fetch(`/api/search?q=${encodeURIComponent(q)}`);
+  const res = await fetch("/api/search?q=" + encodeURIComponent(q));
   const data = await res.json();
 
   let html = "";
@@ -52,93 +53,22 @@ async function search() {
   if (data.Heading) {
     html += `<div class="card">
       <h2>${data.Heading}</h2>
-      <p>${data.Abstract}</p>
+      <p>${data.Abstract || ""}</p>
     </div>`;
   }
 
-  (data.RelatedTopics || []).forEach(item => {
-    if (item.Text && item.FirstURL) {
+  (data.RelatedTopics || []).forEach(t => {
+    if (t.Text) {
       html += `<div class="card">
-        <p>${item.Text}</p>
-        <a href="${item.FirstURL}" target="_blank">Open</a>
+        <p>${t.Text}</p>
+        <a href="${t.FirstURL}" target="_blank">Open</a>
       </div>`;
     }
   });
 
-  resDiv.innerHTML = html || "No results";
+  out.innerHTML = html || "No results";
 }
 </script>
 
 </body>
 </html>
-
----
-
-## 📄 api/search.js
-
-export default async function handler(req, res) {
-  const q = req.query.q;
-
-  if (!q) {
-    return res.status(400).json({ error: "Missing query" });
-  }
-
-  try {
-    const response = await fetch(
-      `https://api.duckduckgo.com/?q=${encodeURIComponent(q)}&format=json`
-    );
-
-    const data = await response.json();
-
-    res.status(200).json(data);
-
-  } catch (e) {
-    res.status(500).json({ error: "Failed" });
-  }
-}
-
----
-
-## 📄 package.json
-
-{
-  "name": "duckduckgo-proxy",
-  "version": "1.0.0",
-  "private": true
-}
-
----
-
-## 🚀 Deploy
-
-1. Skapa repo på GitHub  
-2. Ladda upp alla filer  
-3. Gå till Vercel  
-4. Importera repo  
-5. Deploy  
-
----
-
-## 🔗 Klar!
-
-Din sida:
-https://your-app.vercel.app
-
----
-
-## 🎯 Resultat
-
-User → Vercel (proxy IP) → DuckDuckGo
-
-✔ Användarens IP döljs  
-✔ Funkar globalt  
-✔ Gratis setup  
-
----
-
-## ⚠️ Notis
-
-- Detta är inte anonymitet som VPN/Tor
-- Men fungerar som proxy för API requests
-
----
